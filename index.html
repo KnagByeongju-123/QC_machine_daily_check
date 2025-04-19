@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>검사기 체크시트</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      font-size: 18px;
+    }
+    table {
+      width: 50%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 18px;
+    }
+    th, td {
+      border: 1px solid #444;
+      padding: 8px;
+    }
+    th {
+      background-color: #f0f0f0;
+      text-align: center;
+    }
+    .section-title {
+      font-weight: bold;
+      background-color: #dbefff;
+      text-align: left;
+    }
+    label {
+      margin-right: 10px;
+    }
+    input, select, textarea {
+      font-size: 18px;
+    }
+    .submit-button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 18px;
+    }
+    #memo {
+      width: 50%;
+      height: 100px;
+      font-size: 18px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>검사기 체크시트</h2>
+
+  <form id="inspectionForm">
+    <table>
+      <tr>
+        <th>점검일자</th>
+        <td><input type="date" id="checkDate" name="checkDate" required></td>
+      </tr>
+      <tr>
+        <th>점검시간</th>
+        <td><input type="time" id="checkTime" name="checkTime" required></td>
+      </tr>
+      <tr>
+        <th>검사자</th>
+        <td>
+          <input type="text" id="inspector" name="inspector" required list="inspectorList">
+          <datalist id="inspectorList">
+            <option value="강병주">
+            <option value="오윤정">
+            <option value="김상기">
+            <option value="허미정">
+            <option value="오현민">
+            <option value="문수진">
+            <option value="김미선">
+            <option value="송경옥">
+            <option value="권혜영">
+            <option value="김갑선">
+            <option value="진정화">
+            <option value="이유선">
+            <option value="강란희">
+            <option value="차찬이">
+            <option value="서성자">
+            <option value="전귀옥">
+            <option value="양혜정">
+          </datalist>
+        </td>
+      </tr>
+      <tr>
+        <th>검사기</th>
+        <td>
+          <select id="machine" name="machine" required>
+            <option value="">선택</option>
+            <option value="3호기">3호기</option>
+            <option value="4호기">4호기</option>
+            <option value="5호기">5호기</option>
+            <option value="6호기">6호기</option>
+            <option value="7호기">7호기</option>
+            <option value="8호기">8호기</option>
+            <option value="9호기">9호기</option>
+            <option value="10호기">10호기</option>
+            <option value="11호기">11호기</option>
+            <option value="12호기">12호기</option>
+          </select>
+        </td>
+      </tr>
+      <tr><th colspan="2" class="section-title">점검 항목</th></tr>
+      <tr><td>투입부 이송</td><td><label><input type="radio" name="chk_input" value="OK" required> OK</label> <label><input type="radio" name="chk_input" value="NG"> NG</label></td></tr>
+      <tr><td>상승체인 이송</td><td><label><input type="radio" name="chk_chain" value="OK" required> OK</label> <label><input type="radio" name="chk_chain" value="NG"> NG</label></td></tr>
+      <tr><td>높이검사 청소</td><td><label><input type="radio" name="chk_height" value="OK" required> OK</label> <label><input type="radio" name="chk_height" value="NG"> NG</label></td></tr>
+      <tr><td>카메라 청소/풀림</td><td><label><input type="radio" name="chk_camera" value="OK" required> OK</label> <label><input type="radio" name="chk_camera" value="NG"> NG</label></td></tr>
+      <tr><td>이송밸트 걸림</td><td><label><input type="radio" name="chk_belt" value="OK" required> OK</label> <label><input type="radio" name="chk_belt" value="NG"> NG</label></td></tr>
+      <tr><td>회전판 걸림</td><td><label><input type="radio" name="chk_plate" value="OK" required> OK</label> <label><input type="radio" name="chk_plate" value="NG"> NG</label></td></tr>
+      <tr><td>에디작동</td><td><label><input type="radio" name="chk_eddy" value="OK" required> OK</label> <label><input type="radio" name="chk_eddy" value="NG"> NG</label></td></tr>
+      <tr><td>배출부 인식</td><td><label><input type="radio" name="chk_out" value="OK" required> OK</label> <label><input type="radio" name="chk_out" value="NG"> NG</label></td></tr>
+      <tr><td>불량샘플 상태</td><td><label><input type="radio" name="chk_sample" value="OK" required> OK</label> <label><input type="radio" name="chk_sample" value="NG"> NG</label></td></tr>
+    </table>
+
+    <label for="memo"><strong>비고:</strong></label><br>
+    <textarea id="memo" name="memo" placeholder="특이사항 또는 메모를 입력하세요"></textarea>
+
+    <br>
+    <button type="submit" class="submit-button">제출</button>
+  </form>
+
+  <script>
+    function setDateTimeNow() {
+      const now = new Date();
+      document.getElementById("checkDate").value = now.toISOString().split("T")[0];
+      document.getElementById("checkTime").value = now.toTimeString().split(":" ).slice(0, 2).join(":" );
+    }
+
+    window.addEventListener("DOMContentLoaded", setDateTimeNow);
+
+    document.getElementById("inspectionForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const form = e.target;
+      const inspectorValue = form.inspector.value;
+
+      const data = {
+        date: form.checkDate.value,
+        time: form.checkTime.value,
+        inspector: inspectorValue,
+        machine: form.machine.value,
+        inputs: {
+          "투입부 이송": form.chk_input.value,
+          "상승체인 이송": form.chk_chain.value,
+          "높이검사 청소": form.chk_height.value,
+          "카메라 청소/풀림": form.chk_camera.value,
+          "이송밸트 걸림": form.chk_belt.value,
+          "회전판 걸림": form.chk_plate.value,
+          "에디작동": form.chk_eddy.value,
+          "배출부 인식": form.chk_out.value,
+          "불량샘플 상태": form.chk_sample.value
+        },
+        memo: form.memo.value
+      };
+
+      fetch("https://script.google.com/macros/s/AKfycbyfPgQ9cmOwPszT5AL7nWy9r6EcmEr1EyL55SRHZby3mr8M1TKcyXA0WF43p1nqI3KVvA/exec", {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+      })
+      .then(() => {
+        alert("제출 완료되었습니다.");
+        const inspectorValuePreserved = form.inspector.value;
+        form.reset();
+        setDateTimeNow();
+        form.inspector.value = inspectorValuePreserved;
+      })
+      .catch((error) => alert("저장 실패: " + error));
+    });
+  </script>
+
+</body>
+</html>
