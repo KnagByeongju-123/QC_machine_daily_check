@@ -147,10 +147,18 @@
   </form>
   <script>
     function setDateTimeNow() {
-      const now = new Date();
-      document.getElementById("checkDate").value = now.toISOString().split("T")[0];
-      document.getElementById("checkTime").value = now.toTimeString().split(":").slice(0,2).join(":");
-    }
+  const now = new Date();
+  // UTC 기반 toISOString 사용 X → local date components로 직접 포맷팅
+  const year  = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day   = String(now.getDate()).padStart(2, '0');
+  document.getElementById("checkDate").value = `${year}-${month}-${day}`;
+
+  // 시간은 getHours()/getMinutes()로 뽑는 게 안전
+  const hours   = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  document.getElementById("checkTime").value = `${hours}:${minutes}`;
+}
     window.addEventListener("DOMContentLoaded", setDateTimeNow);
     document.getElementById("inspectionForm").addEventListener("submit", function(e) {
       e.preventDefault();
