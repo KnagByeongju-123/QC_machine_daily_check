@@ -220,7 +220,7 @@
           <label><input type="radio" name="chk_chain" value="OK" class="disabled-radio" disabled> OK</label> 
           <label><input type="radio" name="chk_chain" value="NG" class="disabled-radio" disabled> NG</label>
           <button type="button" class="qr-scan-button" onclick="scanQRCode('qrResult')">QR 스캔</button>
-          <span id="qrStatus" class="qr-status qr-required">QR "2" 스캔 필요</span>
+          <span id="qrStatus" class="qr-status qr-required">QR "2" 스캔</span>
           <input type="hidden" id="qrResult" name="qrResult">
         </td>
       </tr>
@@ -401,7 +401,7 @@
           radio.classList.add('disabled-radio');
           radio.required = false;
         });
-        qrStatus.textContent = 'QR "2" 스캔 필요';
+        qrStatus.textContent = 'QR "2" 스캔';
         qrStatus.className = 'qr-status qr-required';
       })
       .catch(err => alert("저장 실패: " + err));
