@@ -73,6 +73,86 @@
       cursor: pointer;
       box-sizing: border-box;
     }
+    
+    /* QR코드 관련 스타일 */
+    .qr-scan-button {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-left: 10px;
+    }
+    
+    .qr-scan-button:hover {
+      background-color: #218838;
+    }
+    
+    #preview-wrapper {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    
+    #preview-container {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      position: relative;
+      max-width: 400px;
+      width: 90%;
+    }
+    
+    #preview {
+      width: 100%;
+      height: 300px;
+      border: 2px solid #ddd;
+      border-radius: 4px;
+    }
+    
+    #closePreview {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    
+    .disabled-radio {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+    
+    .qr-status {
+      color: #666;
+      font-size: 14px;
+      margin-left: 10px;
+    }
+    
+    .qr-success {
+      color: #28a745;
+      font-weight: bold;
+    }
+    
+    .qr-required {
+      color: #dc3545;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -132,7 +212,16 @@
       </tr>
       <tr><th colspan="2" class="section-title">점검 항목</th></tr>
       <tr><td>작업기종 표시</td><td><label><input type="radio" name="chk_input" value="OK" required> OK</label> <label><input type="radio" name="chk_input" value="NG"> NG</label></td></tr>
-      <tr><td>기종전환시 잔량없음</td><td><label><input type="radio" name="chk_chain" value="OK" required> OK</label> <label><input type="radio" name="chk_chain" value="NG"> NG</label></td></tr>
+      <tr>
+        <td>기종전환시 잔량없음</td>
+        <td>
+          <label><input type="radio" name="chk_chain" value="OK" class="disabled-radio" disabled> OK</label> 
+          <label><input type="radio" name="chk_chain" value="NG" class="disabled-radio" disabled> NG</label>
+          <button type="button" class="qr-scan-button" onclick="scanQRCode('qrResult')">QR 스캔</button>
+          <span id="qrStatus" class="qr-status qr-required">QR코드 "2" 스캔 필요</span>
+          <input type="hidden" id="qrResult" name="qrResult">
+        </td>
+      </tr>
       <tr><td>높이검사 청소</td><td><label><input type="radio" name="chk_height" value="OK" required> OK</label> <label><input type="radio" name="chk_height" value="NG"> NG</label></td></tr>
       <tr><td>카메라 청소/풀림</td><td><label><input type="radio" name="chk_camera" value="OK" required> OK</label> <label><input type="radio" name="chk_camera" value="NG"> NG</label></td></tr>
       <tr><td>이송밸트 걸림</td><td><label><input type="radio" name="chk_belt" value="OK" required> OK</label> <label><input type="radio" name="chk_belt" value="NG"> NG</label></td></tr>
@@ -145,23 +234,128 @@
     <textarea id="memo" name="memo" placeholder="특이사항 또는 메모를 입력하세요"></textarea>
     <button type="submit" class="submit-button">제출</button>
   </form>
-  <script>
-    function setDateTimeNow() {
-  const now = new Date();
-  // UTC 기반 toISOString 사용 X → local date components로 직접 포맷팅
-  const year  = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day   = String(now.getDate()).padStart(2, '0');
-  document.getElementById("checkDate").value = `${year}-${month}-${day}`;
 
-  // 시간은 getHours()/getMinutes()로 뽑는 게 안전
-  const hours   = String(now.getHours()).padStart(2, '0');
-  const minutes = String(now.getMinutes()).padStart(2, '0');
-  document.getElementById("checkTime").value = `${hours}:${minutes}`;
-}
+  <!-- QR 스캔 프리뷰 영역 -->
+  <div id="preview-wrapper">
+    <div id="preview-container">
+      <button id="closePreview">&times;</button>
+      <div id="preview"></div>
+    </div>
+  </div>
+
+  <!-- HTML5 QR Code 라이브러리 로드 -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <script>
+    let html5QrCodeInstance;
+    let currentScanTarget;
+
+    function setDateTimeNow() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      document.getElementById("checkDate").value = `${year}-${month}-${day}`;
+
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      document.getElementById("checkTime").value = `${hours}:${minutes}`;
+    }
+
+    // QR 스캔 시작
+    function scanQRCode(targetId) {
+      currentScanTarget = targetId;
+      const previewWrapper = document.getElementById("preview-wrapper");
+      const preview = document.getElementById("preview");
+      previewWrapper.style.display = "flex";
+      
+      html5QrCodeInstance = new Html5Qrcode("preview");
+      html5QrCodeInstance.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 300, height: 300 } },
+        decodedText => {
+          // 스캔된 텍스트를 대상 필드에 입력
+          document.getElementById(currentScanTarget).value = decodedText;
+          
+          // QR코드가 "2"인지 확인하고 기종전환시 잔량없음 항목 활성화/비활성화
+          checkQRCodeAndEnableChain(decodedText);
+          
+          alert(`스캔 결과: ${decodedText}`);
+          stopQrScanner();
+        },
+        err => console.warn('QR 인식 실패:', err)
+      ).catch(console.error);
+    }
+
+    // QR 스캔 중지
+    function stopQrScanner() {
+      const wrapper = document.getElementById("preview-wrapper");
+      wrapper.style.display = "none";
+      if (html5QrCodeInstance) {
+        html5QrCodeInstance.stop()
+          .then(() => html5QrCodeInstance.clear())
+          .catch(console.error);
+      }
+    }
+
+    // QR코드 확인 및 기종전환시 잔량없음 항목 활성화
+    function checkQRCodeAndEnableChain(qrValue) {
+      const chainRadios = document.querySelectorAll('input[name="chk_chain"]');
+      const qrStatus = document.getElementById('qrStatus');
+      
+      if (qrValue === "2") {
+        // QR코드가 "2"인 경우 활성화
+        chainRadios.forEach(radio => {
+          radio.disabled = false;
+          radio.classList.remove('disabled-radio');
+          radio.required = true;
+        });
+        qrStatus.textContent = `QR코드 "${qrValue}" 인증 완료`;
+        qrStatus.className = 'qr-status qr-success';
+      } else {
+        // QR코드가 "2"가 아닌 경우 비활성화 유지
+        chainRadios.forEach(radio => {
+          radio.disabled = true;
+          radio.classList.add('disabled-radio');
+          radio.checked = false;
+          radio.required = false;
+        });
+        qrStatus.textContent = `잘못된 QR코드 "${qrValue}". "2"가 필요합니다.`;
+        qrStatus.className = 'qr-status qr-required';
+      }
+    }
+
+    // 폼 제출 시 검증
+    function validateForm() {
+      const qrResult = document.getElementById('qrResult').value;
+      const chainRadios = document.querySelectorAll('input[name="chk_chain"]');
+      const chainChecked = Array.from(chainRadios).some(radio => radio.checked);
+      
+      if (qrResult !== "2") {
+        alert('기종전환시 잔량없음 항목을 위해 QR코드 "2"를 스캔해주세요.');
+        return false;
+      }
+      
+      if (!chainChecked) {
+        alert('기종전환시 잔량없음 항목을 선택해주세요.');
+        return false;
+      }
+      
+      return true;
+    }
+
     window.addEventListener("DOMContentLoaded", setDateTimeNow);
+    
+    // 닫기 버튼 클릭 시 스캔 중지
+    document.getElementById('closePreview').addEventListener('click', stopQrScanner);
+
     document.getElementById("inspectionForm").addEventListener("submit", function(e) {
       e.preventDefault();
+      
+      // 폼 검증
+      if (!validateForm()) {
+        return;
+      }
+      
       const form = e.target;
       const inspectorValue = form.inspector.value;
       const data = {
@@ -169,6 +363,7 @@
         time: form.checkTime.value,
         inspector: inspectorValue,
         machine: form.machine.value,
+        qrCode: form.qrResult.value,
         inputs: {
           "작업기종 표시": form.chk_input.value,
           "기종전환시 잔량없음": form.chk_chain.value,
@@ -182,13 +377,31 @@
         },
         memo: form.memo.value
       };
+      
       fetch("https://script.google.com/macros/s/AKfycbyfPgQ9cmOwPszT5AL7nWy9r6EcmEr1EyL55SRHZby3mr8M1TKcyXA0WF43p1nqI3KVvA/exec", {
         method: "POST",
         mode: "no-cors",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(data)
       })
-      .then(() => { alert("제출 완료되었습니다."); const prev = form.inspector.value; form.reset(); setDateTimeNow(); form.inspector.value = prev; })
+      .then(() => { 
+        alert("제출 완료되었습니다."); 
+        const prev = form.inspector.value; 
+        form.reset(); 
+        setDateTimeNow(); 
+        form.inspector.value = prev;
+        
+        // 기종전환시 잔량없음 항목 다시 비활성화
+        const chainRadios = document.querySelectorAll('input[name="chk_chain"]');
+        const qrStatus = document.getElementById('qrStatus');
+        chainRadios.forEach(radio => {
+          radio.disabled = true;
+          radio.classList.add('disabled-radio');
+          radio.required = false;
+        });
+        qrStatus.textContent = 'QR코드 "2" 스캔 필요';
+        qrStatus.className = 'qr-status qr-required';
+      })
       .catch(err => alert("저장 실패: " + err));
     });
   </script>
