@@ -131,8 +131,8 @@
         </td>
       </tr>
       <tr><th colspan="2" class="section-title">점검 항목</th></tr>
-      <tr><td>투입부 이송</td><td><label><input type="radio" name="chk_input" value="OK" required> OK</label> <label><input type="radio" name="chk_input" value="NG"> NG</label></td></tr>
-      <tr><td>상승체인 이송</td><td><label><input type="radio" name="chk_chain" value="OK" required> OK</label> <label><input type="radio" name="chk_chain" value="NG"> NG</label></td></tr>
+      <tr><td>작업기종 표시</td><td><label><input type="radio" name="chk_input" value="OK" required> OK</label> <label><input type="radio" name="chk_input" value="NG"> NG</label></td></tr>
+      <tr><td>기종전환시 잔량없음</td><td><label><input type="radio" name="chk_chain" value="OK" required> OK</label> <label><input type="radio" name="chk_chain" value="NG"> NG</label></td></tr>
       <tr><td>높이검사 청소</td><td><label><input type="radio" name="chk_height" value="OK" required> OK</label> <label><input type="radio" name="chk_height" value="NG"> NG</label></td></tr>
       <tr><td>카메라 청소/풀림</td><td><label><input type="radio" name="chk_camera" value="OK" required> OK</label> <label><input type="radio" name="chk_camera" value="NG"> NG</label></td></tr>
       <tr><td>이송밸트 걸림</td><td><label><input type="radio" name="chk_belt" value="OK" required> OK</label> <label><input type="radio" name="chk_belt" value="NG"> NG</label></td></tr>
@@ -170,8 +170,8 @@
         inspector: inspectorValue,
         machine: form.machine.value,
         inputs: {
-          "투입부 이송": form.chk_input.value,
-          "상승체인 이송": form.chk_chain.value,
+          "작업기종 표시": form.chk_input.value,
+          "기종전환시 잔량없음": form.chk_chain.value,
           "높이검사 청소": form.chk_height.value,
           "카메라 청소/풀림": form.chk_camera.value,
           "이송밸트 걸림": form.chk_belt.value,
