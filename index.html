@@ -177,7 +177,7 @@
             <option value="권혜영">권혜영</option>
             <option value="강란희">강란희</option>
             <option value="이유선">이유선</option>
-            <option value="진정화">진정화</option>
+            <option value="진정화">송경옥</option>
             <option value="강병주">강병주</option>
             <option value="오윤정">오윤정</option>
             <option value="김상기">김상기</option>
@@ -185,12 +185,10 @@
             <option value="오현민">오현민</option>
             <option value="문수진">문수진</option>
             <option value="김미선">김미선</option>
-            <option value="송경옥">송경옥</option>
-            <option value="김갑선">김갑선</option>
+            <option value="송경옥">하정화</option>
             <option value="차찬이">차찬이</option>
             <option value="서성자">서성자</option>
             <option value="전귀옥">전귀옥</option>
-            <option value="양혜정">양혜정</option>
           </select>
         </td>
       </tr>
@@ -230,7 +228,7 @@
       <tr><td>회전판 걸림</td><td><label><input type="radio" name="chk_plate" value="OK" required> OK</label> <label><input type="radio" name="chk_plate" value="NG"> NG</label></td></tr>
       <tr><td>에디작동</td><td><label><input type="radio" name="chk_eddy" value="OK" required> OK</label> <label><input type="radio" name="chk_eddy" value="NG"> NG</label></td></tr>
       <tr><td>배출부 인식</td><td><label><input type="radio" name="chk_out" value="OK" required> OK</label> <label><input type="radio" name="chk_out" value="NG"> NG</label></td></tr>
-      <tr><td>불량샘플 상태</td><td><label><input type="radio" name="chk_sample" value="OK" required> OK</label> <label><input type="radio" name="chk_sample" value="NG"> NG</label></td></tr>
+      <tr><td>불량샘플 검출</td><td><label><input type="radio" name="chk_sample" value="OK" required> OK</label> <label><input type="radio" name="chk_sample" value="NG"> NG</label></td></tr>
     </table>
     <label for="memo"><strong>비고:</strong></label>
     <textarea id="memo" name="memo" placeholder="특이사항 또는 메모를 입력하세요"></textarea>
@@ -375,7 +373,7 @@
           "회전판 걸림": form.chk_plate.value,
           "에디작동": form.chk_eddy.value,
           "배출부 인식": form.chk_out.value,
-          "불량샘플 상태": form.chk_sample.value
+          "불량샘플 검출": form.chk_sample.value
         },
         memo: form.memo.value
       };
