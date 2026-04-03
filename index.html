@@ -531,6 +531,91 @@
 
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script>
+// === Supabase 설정 ===
+const SB_URL='https://omngtyewdaqpphnzeate.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tbmd0eWV3ZGFxcHBobnplYXRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4ODk4ODksImV4cCI6MjA5MDQ2NTg4OX0.Zxur3t02JHtOcXforCMSwO3i2mMaf5sViE0tXXUC0-s';
+
+async function sbInsert(table, data) {
+  const res = await fetch(`${SB_URL}/rest/v1/${table}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': SB_KEY,
+      'Authorization': 'Bearer ' + SB_KEY,
+      'Prefer': 'return=representation'
+    },
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.message || JSON.stringify(err));
+  }
+  return await res.json();
+}
+
+async function sbSelect(table, filter, order, limit) {
+  let url = `${SB_URL}/rest/v1/${table}?select=*`;
+  if (filter) Object.entries(filter).forEach(([k,v]) => url += `&${k}=${v}`);
+  if (order) url += `&order=${order}`;
+  if (limit) url += `&limit=${limit}`;
+  const res = await fetch(url, {
+    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+  });
+  if (!res.ok) throw new Error('조회 실패');
+  return await res.json();
+}
+
+// 테이블 자동 생성
+async function ensureTable() {
+  try {
+    await fetch(`${SB_URL}/rest/v1/qc_machine_check?select=id&limit=1`, {
+      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+    }).then(r => { if (r.status === 404) throw new Error('no table'); });
+  } catch(e) {
+    // 테이블이 없으면 SQL로 생성
+    try {
+      await fetch(`${SB_URL}/rest/v1/rpc/exec_sql`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SB_KEY,
+          'Authorization': 'Bearer ' + SB_KEY
+        },
+        body: JSON.stringify({ query: CREATE_TABLE_SQL })
+      });
+    } catch(e2) {
+      console.log('테이블 자동생성 불가 - SQL Editor에서 수동 실행 필요');
+    }
+  }
+}
+
+const CREATE_TABLE_SQL = `
+CREATE TABLE IF NOT EXISTS qc_machine_check (
+  id bigint generated always as identity primary key,
+  check_date date not null,
+  check_time time not null,
+  inspector text not null,
+  machine text not null,
+  qr_code text,
+  chk_input text default 'OK',
+  chk_chain text default 'OK',
+  chk_height text default 'OK',
+  chk_camera text default 'OK',
+  chk_belt text default 'OK',
+  chk_plate text default 'OK',
+  chk_eddy text default 'OK',
+  chk_out text default 'OK',
+  chk_sample text default 'OK',
+  ng_count integer default 0,
+  result text default 'OK',
+  memo text,
+  created_at timestamptz default now()
+);
+ALTER TABLE qc_machine_check ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "anon_all_qc_machine_check" ON qc_machine_check;
+CREATE POLICY "anon_all_qc_machine_check" ON qc_machine_check FOR ALL TO anon USING (true) WITH CHECK (true);
+`;
+
 let html5QrCodeInstance;
 let currentScanTarget;
 
@@ -644,7 +729,7 @@ function validateForm() {
 
 document.getElementById('closePreview').addEventListener('click', stopQrScanner);
 
-document.getElementById("inspectionForm").addEventListener("submit", function(e) {
+document.getElementById("inspectionForm").addEventListener("submit", async function(e) {
   e.preventDefault();
   if (!validateForm()) return;
 
@@ -669,14 +754,32 @@ document.getElementById("inspectionForm").addEventListener("submit", function(e)
     memo: form.memo.value
   };
 
-  fetch("https://script.google.com/macros/s/AKfycbxkQJe51sc2Gc85t914Mkl3JWEQPOhn2hw6opTbM5t-aZVrzH0ZMW3mU4HHceT6YsqKDw/exec", {
-    method: "POST",
-    mode: "no-cors",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify(data)
-  })
-  .then(() => {
+  // Supabase에 저장
+  const ngItems = Object.entries(data.inputs).filter(([k,v])=>v==='NG');
+  const row = {
+    check_date: data.date,
+    check_time: data.time,
+    inspector: data.inspector,
+    machine: data.machine,
+    qr_code: data.qrCode,
+    chk_input: data.inputs["작업기종 표시"],
+    chk_chain: data.inputs["기종전환시 잔량없음"],
+    chk_height: data.inputs["높이검사 청소"],
+    chk_camera: data.inputs["카메라 청소/풀림"],
+    chk_belt: data.inputs["이송밸트 걸림"],
+    chk_plate: data.inputs["회전판 걸림"],
+    chk_eddy: data.inputs["에디작동"],
+    chk_out: data.inputs["배출부 인식"],
+    chk_sample: data.inputs["불량샘플 검출"],
+    ng_count: ngItems.length,
+    result: ngItems.length ? 'NG' : 'OK',
+    memo: data.memo
+  };
+
+  try {
+    await sbInsert('qc_machine_check', row);
     alert("제출 완료되었습니다.");
+    sendTelegram(data);
     const prev = form.inspector.value;
     form.reset();
     setDateTimeNow();
@@ -699,13 +802,36 @@ document.getElementById("inspectionForm").addEventListener("submit", function(e)
     document.getElementById('qrStatus').textContent = 'QR "2" 스캔 필요';
     document.getElementById('qrStatus').className = 'qr-status qr-required';
     updateProgress();
-  })
-  .catch(err => alert("저장 실패: " + err));
+  } catch(err) {
+    alert("저장 실패: " + err.message);
+  }
 });
+
+// === 텔레그램 알림 ===
+const TG_BOT='8367539669:AAFzZeMULV8B4adNROtENsUc6wr0MvLpSi0';
+const TG_USERS={'강병주':'7957128115','김상기':'8317824579'};
+
+async function sendTelegram(data){
+  const checks=Object.entries(data.inputs).map(([k,v])=>(v==='NG'?'❌':'✅')+' '+k+': '+v).join('\n');
+  const ngItems=Object.entries(data.inputs).filter(([k,v])=>v==='NG');
+  const status=ngItems.length?'⚠️ NG '+ngItems.length+'건':'✅ 전체 OK';
+  const msg=`🔬 검사기 일상점검 결과\n━━━━━━━━━━━━━━\n📅 ${data.date} ${data.time}\n👤 검사자: ${data.inspector}\n🏭 검사기: ${data.machine}\n\n📋 점검결과: ${status}\n${checks}${data.memo?'\n\n📝 비고: '+data.memo:''}`;
+
+  for(const chatId of Object.values(TG_USERS)){
+    try{
+      await fetch(`https://api.telegram.org/bot${TG_BOT}/sendMessage`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({chat_id:chatId,text:msg,parse_mode:''})
+      });
+    }catch(e){console.log('텔레그램 전송 실패:',e)}
+  }
+}
 
 window.addEventListener("DOMContentLoaded", () => {
   setDateTimeNow();
   updateProgress();
+  ensureTable();
 });
 </script>
 </body>
