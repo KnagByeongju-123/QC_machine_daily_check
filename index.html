@@ -2,178 +2,363 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>검사기 일상점검 체크시트</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;900&display=swap">
   <style>
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface2: #334155;
+      --border: #475569;
+      --accent: #38bdf8;
+      --accent2: #0ea5e9;
+      --ok: #22c55e;
+      --ok-bg: rgba(34,197,94,.12);
+      --ng: #ef4444;
+      --ng-bg: rgba(239,68,68,.12);
+      --text: #e2e8f0;
+      --text2: #94a3b8;
+      --text3: #64748b;
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 20px;
-      background-color: #f9f9f9;
-      box-sizing: border-box;
+      font-family: 'Noto Sans KR', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 40px;
     }
-    h2 {
+
+    /* Header */
+    .hdr {
+      background: linear-gradient(135deg, #0c4a6e, #0369a1);
+      padding: 20px 16px 16px;
       text-align: center;
-      font-size: 20px;
-      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
     }
-    form {
-      width: 100%;
-      max-width: 600px;
+    .hdr::before {
+      content: '';
+      position: absolute;
+      top: -50%; left: -50%;
+      width: 200%; height: 200%;
+      background: repeating-linear-gradient(
+        45deg, transparent, transparent 10px,
+        rgba(255,255,255,.02) 10px, rgba(255,255,255,.02) 20px
+      );
+      pointer-events: none;
+    }
+    .hdr h1 { font-size: 18px; font-weight: 900; letter-spacing: -.3px; position: relative; }
+    .hdr p { font-size: 11px; color: #7dd3fc; margin-top: 3px; position: relative; }
+
+    /* Form container */
+    .form-wrap {
+      max-width: 520px;
       margin: 0 auto;
-      background: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      box-sizing: border-box;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 18px;
-      margin-bottom: 16px;
-    }
-    th, td {
-      border: 1px solid #444;
-      padding: 8px;
-      box-sizing: border-box;
-    }
-    th {
-      background-color: #f0f0f0;
-      text-align: center;
-    }
-    .section-title {
-      font-weight: bold;
-      background-color: #dbefff;
-      text-align: left;
-    }
-    input[type="date"],
-    input[type="time"],
-    select,
-    textarea,
-    input[type="text"] {
-      width: 100%;
-      font-size: 18px;
-      padding: 6px;
-      margin: 4px 0 8px;
-      box-sizing: border-box;
-    }
-    textarea {
-      height: 100px;
-      resize: vertical;
-    }
-    .submit-button {
-      width: 100%;
       padding: 12px;
-      font-size: 18px;
-      background-color: #007BFF;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      box-sizing: border-box;
     }
-    
-    /* QR코드 관련 스타일 */
-    .qr-scan-button {
-      background-color: #28a745;
-      color: white;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 4px;
-      cursor: pointer;
+
+    /* Card */
+    .card {
+      background: var(--surface);
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    .card-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: .5px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .card-title::before {
+      content: '';
+      width: 3px;
+      height: 14px;
+      background: var(--accent);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    /* Field group */
+    .fg { margin-bottom: 12px; }
+    .fg:last-child { margin-bottom: 0; }
+    .fg label.field-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text2);
+      margin-bottom: 5px;
+    }
+    .fg select,
+    .fg input[type="date"],
+    .fg input[type="time"],
+    .fg input[type="text"],
+    .fg textarea {
+      width: 100%;
+      padding: 11px 12px;
+      font-size: 15px;
+      font-family: 'Noto Sans KR', sans-serif;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      appearance: auto;
+      -webkit-appearance: auto;
+      transition: border-color .2s;
+    }
+    .fg select:focus,
+    .fg input:focus,
+    .fg textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .fg textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    .fg-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    /* Check items */
+    .check-list { display: flex; flex-direction: column; gap: 6px; }
+    .check-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      background: var(--bg);
+      border: 1.5px solid rgba(255,255,255,.06);
+      border-radius: 10px;
+      transition: border-color .2s, background .2s;
+    }
+    .check-item.checked-ok {
+      border-color: rgba(34,197,94,.3);
+      background: var(--ok-bg);
+    }
+    .check-item.checked-ng {
+      border-color: rgba(239,68,68,.3);
+      background: var(--ng-bg);
+    }
+    .check-item.disabled-item {
+      opacity: .45;
+    }
+    .check-label {
       font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      flex: 1;
+      min-width: 0;
+    }
+    .check-label .sub-info {
+      display: block;
+      font-size: 10px;
+      color: var(--text3);
+      margin-top: 2px;
+    }
+
+    /* OK / NG toggle buttons */
+    .okng-group {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
       margin-left: 10px;
     }
-    
-    .qr-scan-button:hover {
-      background-color: #218838;
+    .okng-group input[type="radio"] { display: none; }
+    .okng-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 34px;
+      border-radius: 7px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1.5px solid var(--border);
+      background: transparent;
+      color: var(--text3);
+      transition: all .15s;
+      font-family: 'Noto Sans KR', sans-serif;
+      user-select: none;
     }
-    
+    .okng-btn:active { transform: scale(.93); }
+    .okng-btn.ok-selected {
+      background: var(--ok);
+      border-color: var(--ok);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(34,197,94,.3);
+    }
+    .okng-btn.ng-selected {
+      background: var(--ng);
+      border-color: var(--ng);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(239,68,68,.3);
+    }
+
+    /* QR scan button */
+    .qr-scan-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 8px 14px;
+      background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Noto Sans KR', sans-serif;
+      transition: transform .1s;
+      flex-shrink: 0;
+      margin-left: 8px;
+    }
+    .qr-scan-btn:active { transform: scale(.95); }
+
+    .qr-status {
+      font-size: 11px;
+      margin-left: 8px;
+      font-weight: 600;
+    }
+    .qr-required { color: var(--ng); }
+    .qr-success { color: var(--ok); }
+
+    /* Submit */
+    .submit-btn {
+      width: 100%;
+      padding: 15px;
+      font-size: 16px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #0284c7, #38bdf8);
+      border: none;
+      border-radius: var(--radius);
+      color: #fff;
+      cursor: pointer;
+      font-family: 'Noto Sans KR', sans-serif;
+      transition: transform .1s;
+      box-shadow: 0 4px 16px rgba(56,189,248,.25);
+      letter-spacing: .3px;
+    }
+    .submit-btn:active { transform: scale(.97); }
+
+    /* Progress bar */
+    .progress-wrap {
+      margin-bottom: 12px;
+    }
+    .progress-bar-bg {
+      height: 6px;
+      background: var(--bg);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent2), var(--ok));
+      border-radius: 3px;
+      transition: width .3s ease;
+      width: 0%;
+    }
+    .progress-text {
+      font-size: 10px;
+      color: var(--text3);
+      text-align: right;
+      margin-top: 3px;
+    }
+
+    /* QR Preview overlay */
     #preview-wrapper {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.8);
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,.85);
       display: none;
       justify-content: center;
       align-items: center;
       z-index: 1000;
+      backdrop-filter: blur(4px);
     }
-    
     #preview-container {
-      background: white;
+      background: var(--surface);
       padding: 20px;
-      border-radius: 8px;
+      border-radius: 16px;
       position: relative;
-      max-width: 400px;
+      max-width: 380px;
       width: 90%;
+      border: 1px solid rgba(255,255,255,.1);
     }
-    
     #preview {
       width: 100%;
       height: 300px;
-      border: 2px solid #ddd;
-      border-radius: 4px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
     }
-    
     #closePreview {
       position: absolute;
-      top: -15px;
-      right: -15px;
-      background: #dc3545;
-      color: white;
-      border: none;
+      top: -12px; right: -12px;
+      background: var(--ng);
+      color: #fff;
+      border: 3px solid var(--surface);
       border-radius: 50%;
-      width: 40px;
-      height: 40px;
+      width: 36px; height: 36px;
       cursor: pointer;
-      font-size: 18px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-      z-index: 1001;
+      font-size: 16px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,.4);
     }
-    
-    .disabled-radio {
-      opacity: 0.5;
-      pointer-events: none;
-    }
-    
-    .qr-status {
-      color: #666;
+    .preview-title {
       font-size: 14px;
-      margin-left: 10px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 12px;
+      text-align: center;
     }
-    
-    .qr-success {
-      color: #28a745;
-      font-weight: bold;
-    }
-    
-    .qr-required {
-      color: #dc3545;
-      font-weight: bold;
-    }
+
+    .disabled-radio { opacity: 0.5; pointer-events: none; }
   </style>
 </head>
 <body>
-  <h2>검사기 일상점검 체크시트</h2>
+
+<div class="hdr">
+  <h1>🔬 검사기 일상점검 체크시트</h1>
+  <p>품질관리팀 · 검사기 일상점검 기록</p>
+</div>
+
+<div class="form-wrap">
   <form id="inspectionForm">
-    <table>
-      <tr>
-        <th>점검일자</th>
-        <td><input type="date" id="checkDate" name="checkDate" required></td>
-      </tr>
-      <tr>
-        <th>점검시간</th>
-        <td><input type="time" id="checkTime" name="checkTime" required></td>
-      </tr>
-      <tr>
-        <th>검사자</th>
-        <td>
+
+    <!-- 기본 정보 -->
+    <div class="card">
+      <div class="card-title">기본 정보</div>
+      <div class="fg-row">
+        <div class="fg">
+          <label class="field-label">점검일자</label>
+          <input type="date" id="checkDate" name="checkDate" required>
+        </div>
+        <div class="fg">
+          <label class="field-label">점검시간</label>
+          <input type="time" id="checkTime" name="checkTime" required>
+        </div>
+      </div>
+      <div class="fg-row">
+        <div class="fg">
+          <label class="field-label">검사자</label>
           <select id="inspector" name="inspector" required>
-            <option value="" disabled selected>선택하세요</option>
+            <option value="" disabled selected>선택</option>
             <option value="권혜영">권혜영</option>
             <option value="강란희">강란희</option>
             <option value="이유선">이유선</option>
@@ -190,13 +375,11 @@
             <option value="서성자">서성자</option>
             <option value="전귀옥">전귀옥</option>
           </select>
-        </td>
-      </tr>
-      <tr>
-        <th>검사기</th>
-        <td>
+        </div>
+        <div class="fg">
+          <label class="field-label">검사기</label>
           <select id="machine" name="machine" required>
-            <option value="" disabled selected>선택하세요</option>
+            <option value="" disabled selected>선택</option>
             <option value="3호기">3호기</option>
             <option value="4호기">4호기</option>
             <option value="5호기">5호기</option>
@@ -208,204 +391,322 @@
             <option value="11호기">11호기</option>
             <option value="12호기">12호기</option>
           </select>
-        </td>
-      </tr>
-      <tr><th colspan="2" class="section-title">점검 항목</th></tr>
-      <tr><td>작업기종 표시</td><td><label><input type="radio" name="chk_input" value="OK" required> OK</label> <label><input type="radio" name="chk_input" value="NG"> NG</label></td></tr>
-      <tr>
-        <td>기종전환시 잔량없음</td>
-        <td>
-          <label><input type="radio" name="chk_chain" value="OK" class="disabled-radio" disabled> OK</label> 
-          <label><input type="radio" name="chk_chain" value="NG" class="disabled-radio" disabled> NG</label>
-          <button type="button" class="qr-scan-button" onclick="scanQRCode('qrResult')">QR 스캔</button>
-          <span id="qrStatus" class="qr-status qr-required">QR "2" 스캔</span>
-          <input type="hidden" id="qrResult" name="qrResult">
-        </td>
-      </tr>
-      <tr><td>높이검사 청소</td><td><label><input type="radio" name="chk_height" value="OK" required> OK</label> <label><input type="radio" name="chk_height" value="NG"> NG</label></td></tr>
-      <tr><td>카메라 청소/풀림</td><td><label><input type="radio" name="chk_camera" value="OK" required> OK</label> <label><input type="radio" name="chk_camera" value="NG"> NG</label></td></tr>
-      <tr><td>이송밸트 걸림</td><td><label><input type="radio" name="chk_belt" value="OK" required> OK</label> <label><input type="radio" name="chk_belt" value="NG"> NG</label></td></tr>
-      <tr><td>회전판 걸림</td><td><label><input type="radio" name="chk_plate" value="OK" required> OK</label> <label><input type="radio" name="chk_plate" value="NG"> NG</label></td></tr>
-      <tr><td>에디작동</td><td><label><input type="radio" name="chk_eddy" value="OK" required> OK</label> <label><input type="radio" name="chk_eddy" value="NG"> NG</label></td></tr>
-      <tr><td>배출부 인식</td><td><label><input type="radio" name="chk_out" value="OK" required> OK</label> <label><input type="radio" name="chk_out" value="NG"> NG</label></td></tr>
-      <tr><td>불량샘플 검출(초중종)</td><td><label><input type="radio" name="chk_sample" value="OK" required> OK</label> <label><input type="radio" name="chk_sample" value="NG"> NG</label></td></tr>
-    </table>
-    <label for="memo"><strong>비고:</strong></label>
-    <textarea id="memo" name="memo" placeholder="특이사항 또는 메모를 입력하세요"></textarea>
-    <button type="submit" class="submit-button">제출</button>
-  </form>
-
-  <!-- QR 스캔 프리뷰 영역 -->
-  <div id="preview-wrapper">
-    <div id="preview-container">
-      <button id="closePreview">&times;</button>
-      <div id="preview"></div>
+        </div>
+      </div>
     </div>
+
+    <!-- 진행률 -->
+    <div class="card" style="padding:12px 16px">
+      <div class="progress-wrap">
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill"></div></div>
+        <div class="progress-text" id="progressText">0 / 9 항목 체크</div>
+      </div>
+    </div>
+
+    <!-- 점검 항목 -->
+    <div class="card">
+      <div class="card-title">점검 항목</div>
+      <div class="check-list">
+
+        <div class="check-item" id="item_input">
+          <span class="check-label">작업기종 표시</span>
+          <div class="okng-group">
+            <input type="radio" name="chk_input" id="chk_input_ok" value="OK" required>
+            <label class="okng-btn" for="chk_input_ok" onclick="setCheck('chk_input','OK','item_input')">OK</label>
+            <input type="radio" name="chk_input" id="chk_input_ng" value="NG">
+            <label class="okng-btn" for="chk_input_ng" onclick="setCheck('chk_input','NG','item_input')">NG</label>
+          </div>
+        </div>
+
+        <div class="check-item disabled-item" id="item_chain">
+          <span class="check-label">
+            기종전환시 잔량없음
+            <span class="sub-info">
+              <button type="button" class="qr-scan-btn" onclick="scanQRCode('qrResult')">📷 QR</button>
+              <span id="qrStatus" class="qr-status qr-required">QR "2" 스캔 필요</span>
+            </span>
+          </span>
+          <div class="okng-group">
+            <input type="radio" name="chk_chain" id="chk_chain_ok" value="OK" class="disabled-radio" disabled>
+            <label class="okng-btn" for="chk_chain_ok" onclick="setCheck('chk_chain','OK','item_chain')">OK</label>
+            <input type="radio" name="chk_chain" id="chk_chain_ng" value="NG" class="disabled-radio" disabled>
+            <label class="okng-btn" for="chk_chain_ng" onclick="setCheck('chk_chain','NG','item_chain')">NG</label>
+          </div>
+          <input type="hidden" id="qrResult" name="qrResult">
+        </div>
+
+        <div class="check-item" id="item_height">
+          <span class="check-label">높이검사 청소</span>
+          <div class="okng-group">
+            <input type="radio" name="chk_height" id="chk_height_ok" value="OK" required>
+            <label class="okng-btn" for="chk_height_ok" onclick="setCheck('chk_height','OK','item_height')">OK</label>
+            <input type="radio" name="chk_height" id="chk_height_ng" value="NG">
+            <label class="okng-btn" for="chk_height_ng" onclick="setCheck('chk_height','NG','item_height')">NG</label>
+          </div>
+        </div>
+
+        <div class="check-item" id="item_camera">
+          <span class="check-label">카메라 청소/풀림</span>
+          <div class="okng-group">
+            <input type="radio" name="chk_camera" id="chk_camera_ok" value="OK" required>
+            <label class="okng-btn" for="chk_camera_ok" onclick="setCheck('chk_camera','OK','item_camera')">OK</label>
+            <input type="radio" name="chk_camera" id="chk_camera_ng" value="NG">
+            <label class="okng-btn" for="chk_camera_ng" onclick="setCheck('chk_camera','NG','item_camera')">NG</label>
+          </div>
+        </div>
+
+        <div class="check-item" id="item_belt">
+          <span class="check-label">이송밸트 걸림</span>
+          <div class="okng-group">
+            <input type="radio" name="chk_belt" id="chk_belt_ok" value="OK" required>
+            <label class="okng-btn" for="chk_belt_ok" onclick="setCheck('chk_belt','OK','item_belt')">OK</label>
+            <input type="radio" name="chk_belt" id="chk_belt_ng" value="NG">
+            <label class="okng-btn" for="chk_belt_ng" onclick="setCheck('chk_belt','NG','item_belt')">NG</label>
+          </div>
+        </div>
+
+        <div class="check-item" id="item_plate">
+          <span class="check-label">회전판 걸림</span>
+          <div class="okng-group">
+            <input type="radio" name="chk_plate" id="chk_plate_ok" value="OK" required>
+            <label class="okng-btn" for="chk_plate_ok" onclick="setCheck('chk_plate','OK','item_plate')">OK</label>
+            <input type="radio" name="chk_plate" id="chk_plate_ng" value="NG">
+            <label class="okng-btn" for="chk_plate_ng" onclick="setCheck('chk_plate','NG','item_plate')">NG</label>
+          </div>
+        </div>
+
+        <div class="check-item" id="item_eddy">
+          <span class="check-label">에디작동</span>
+          <div class="okng-group">
+            <input type="radio" name="chk_eddy" id="chk_eddy_ok" value="OK" required>
+            <label class="okng-btn" for="chk_eddy_ok" onclick="setCheck('chk_eddy','OK','item_eddy')">OK</label>
+            <input type="radio" name="chk_eddy" id="chk_eddy_ng" value="NG">
+            <label class="okng-btn" for="chk_eddy_ng" onclick="setCheck('chk_eddy','NG','item_eddy')">NG</label>
+          </div>
+        </div>
+
+        <div class="check-item" id="item_out">
+          <span class="check-label">배출부 인식</span>
+          <div class="okng-group">
+            <input type="radio" name="chk_out" id="chk_out_ok" value="OK" required>
+            <label class="okng-btn" for="chk_out_ok" onclick="setCheck('chk_out','OK','item_out')">OK</label>
+            <input type="radio" name="chk_out" id="chk_out_ng" value="NG">
+            <label class="okng-btn" for="chk_out_ng" onclick="setCheck('chk_out','NG','item_out')">NG</label>
+          </div>
+        </div>
+
+        <div class="check-item" id="item_sample">
+          <span class="check-label">불량샘플 검출(초중종)</span>
+          <div class="okng-group">
+            <input type="radio" name="chk_sample" id="chk_sample_ok" value="OK" required>
+            <label class="okng-btn" for="chk_sample_ok" onclick="setCheck('chk_sample','OK','item_sample')">OK</label>
+            <input type="radio" name="chk_sample" id="chk_sample_ng" value="NG">
+            <label class="okng-btn" for="chk_sample_ng" onclick="setCheck('chk_sample','NG','item_sample')">NG</label>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 비고 -->
+    <div class="card">
+      <div class="card-title">비고</div>
+      <div class="fg">
+        <textarea id="memo" name="memo" placeholder="특이사항 또는 메모를 입력하세요"></textarea>
+      </div>
+    </div>
+
+    <button type="submit" class="submit-btn">✅ 점검 제출</button>
+  </form>
+</div>
+
+<!-- QR 스캔 프리뷰 -->
+<div id="preview-wrapper">
+  <div id="preview-container">
+    <button id="closePreview">&times;</button>
+    <div class="preview-title">📷 QR코드 스캔</div>
+    <div id="preview"></div>
   </div>
+</div>
 
-  <!-- HTML5 QR Code 라이브러리 로드 -->
-  <script src="https://unpkg.com/html5-qrcode"></script>
-  <script>
-    let html5QrCodeInstance;
-    let currentScanTarget;
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script>
+let html5QrCodeInstance;
+let currentScanTarget;
 
-    function setDateTimeNow() {
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const day = String(now.getDate()).padStart(2, '0');
-      document.getElementById("checkDate").value = `${year}-${month}-${day}`;
+// === OK/NG 토글 및 시각 피드백 ===
+function setCheck(name, val, itemId) {
+  const item = document.getElementById(itemId);
+  if (!item) return;
+  // radio가 disabled면 무시
+  const radio = document.querySelector(`input[name="${name}"][value="${val}"]`);
+  if (radio && radio.disabled) return;
 
-      const hours = String(now.getHours()).padStart(2, '0');
-      const minutes = String(now.getMinutes()).padStart(2, '0');
-      document.getElementById("checkTime").value = `${hours}:${minutes}`;
-    }
+  item.classList.remove('checked-ok', 'checked-ng');
+  if (val === 'OK') item.classList.add('checked-ok');
+  else item.classList.add('checked-ng');
 
-    // QR 스캔 시작
-    function scanQRCode(targetId) {
-      currentScanTarget = targetId;
-      const previewWrapper = document.getElementById("preview-wrapper");
-      const preview = document.getElementById("preview");
-      previewWrapper.style.display = "flex";
-      
-      html5QrCodeInstance = new Html5Qrcode("preview");
-      html5QrCodeInstance.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 300, height: 300 } },
-        decodedText => {
-          // 스캔된 텍스트를 대상 필드에 입력
-          document.getElementById(currentScanTarget).value = decodedText;
-          
-          // QR코드가 "2"인지 확인하고 기종전환시 잔량없음 항목 활성화/비활성화
-          checkQRCodeAndEnableChain(decodedText);
-          
-          alert(`스캔 결과: ${decodedText}`);
-          stopQrScanner();
-        },
-        err => console.warn('QR 인식 실패:', err)
-      ).catch(console.error);
-    }
+  // 버튼 시각
+  const grp = item.querySelector('.okng-group');
+  grp.querySelectorAll('.okng-btn').forEach(b => b.classList.remove('ok-selected', 'ng-selected'));
+  const lbl = grp.querySelector(`label[for="${name}_${val.toLowerCase()}"]`);
+  if (lbl) lbl.classList.add(val === 'OK' ? 'ok-selected' : 'ng-selected');
 
-    // QR 스캔 중지
-    function stopQrScanner() {
-      const wrapper = document.getElementById("preview-wrapper");
-      wrapper.style.display = "none";
-      if (html5QrCodeInstance) {
-        html5QrCodeInstance.stop()
-          .then(() => html5QrCodeInstance.clear())
-          .catch(console.error);
-      }
-    }
+  if (navigator.vibrate) navigator.vibrate(val === 'OK' ? [30] : [50, 30, 50]);
+  updateProgress();
+}
 
-    // QR코드 확인 및 기종전환시 잔량없음 항목 활성화
-    function checkQRCodeAndEnableChain(qrValue) {
-      const chainRadios = document.querySelectorAll('input[name="chk_chain"]');
-      const qrStatus = document.getElementById('qrStatus');
-      
-      if (qrValue === "2") {
-        // QR코드가 "2"인 경우 활성화
-        chainRadios.forEach(radio => {
-          radio.disabled = false;
-          radio.classList.remove('disabled-radio');
-          radio.required = true;
-        });
-        qrStatus.textContent = `QR "${qrValue}"완료`;
-        qrStatus.className = 'qr-status qr-success';
-      } else {
-        // QR코드가 "2"가 아닌 경우 비활성화 유지
-        chainRadios.forEach(radio => {
-          radio.disabled = true;
-          radio.classList.add('disabled-radio');
-          radio.checked = false;
-          radio.required = false;
-        });
-        qrStatus.textContent = `잘못된 QR "${qrValue}". "2"가 필요합니다.`;
-        qrStatus.className = 'qr-status qr-required';
-      }
-    }
+function updateProgress() {
+  const names = ['chk_input','chk_chain','chk_height','chk_camera','chk_belt','chk_plate','chk_eddy','chk_out','chk_sample'];
+  let done = 0;
+  names.forEach(n => { if (document.querySelector(`input[name="${n}"]:checked`)) done++; });
+  const pct = Math.round(done / names.length * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent = done + ' / ' + names.length + ' 항목 체크';
+}
 
-    // 폼 제출 시 검증
-    function validateForm() {
-      const qrResult = document.getElementById('qrResult').value;
-      const chainRadios = document.querySelectorAll('input[name="chk_chain"]');
-      const chainChecked = Array.from(chainRadios).some(radio => radio.checked);
-      
-      if (qrResult !== "2") {
-        alert('기종전환시 잔량없음 항목을 위해 QR "2"를 스캔해주세요.');
-        return false;
-      }
-      
-      if (!chainChecked) {
-        alert('기종전환시 잔량없음 항목을 선택해주세요.');
-        return false;
-      }
-      
-      return true;
-    }
+// === 날짜/시간 자동 설정 ===
+function setDateTimeNow() {
+  const now = new Date();
+  document.getElementById("checkDate").value = now.toISOString().split('T')[0];
+  document.getElementById("checkTime").value = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+}
 
-    window.addEventListener("DOMContentLoaded", setDateTimeNow);
-    
-    // 닫기 버튼 클릭 시 스캔 중지
-    document.getElementById('closePreview').addEventListener('click', stopQrScanner);
+// === QR 스캔 ===
+function scanQRCode(targetId) {
+  currentScanTarget = targetId;
+  document.getElementById("preview-wrapper").style.display = "flex";
+  html5QrCodeInstance = new Html5Qrcode("preview");
+  html5QrCodeInstance.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: { width: 250, height: 250 } },
+    decodedText => {
+      document.getElementById(currentScanTarget).value = decodedText;
+      checkQRCodeAndEnableChain(decodedText);
+      alert(`스캔 결과: ${decodedText}`);
+      stopQrScanner();
+    },
+    err => console.warn('QR 인식 실패:', err)
+  ).catch(console.error);
+}
 
-    document.getElementById("inspectionForm").addEventListener("submit", function(e) {
-      e.preventDefault();
-      
-      // 폼 검증
-      if (!validateForm()) {
-        return;
-      }
-      
-      const form = e.target;
-      const inspectorValue = form.inspector.value;
-      const data = {
-        date: form.checkDate.value,
-        time: form.checkTime.value,
-        inspector: inspectorValue,
-        machine: form.machine.value,
-        qrCode: form.qrResult.value,
-        inputs: {
-          "작업기종 표시": form.chk_input.value,
-          "기종전환시 잔량없음": form.chk_chain.value,
-          "높이검사 청소": form.chk_height.value,
-          "카메라 청소/풀림": form.chk_camera.value,
-          "이송밸트 걸림": form.chk_belt.value,
-          "회전판 걸림": form.chk_plate.value,
-          "에디작동": form.chk_eddy.value,
-          "배출부 인식": form.chk_out.value,
-          "불량샘플 검출": form.chk_sample.value
-        },
-        memo: form.memo.value
-      };
-      
-      fetch("https://script.google.com/macros/s/AKfycbxkQJe51sc2Gc85t914Mkl3JWEQPOhn2hw6opTbM5t-aZVrzH0ZMW3mU4HHceT6YsqKDw/exec", {
-        method: "POST",
-        mode: "no-cors",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify(data)
-      })
-      .then(() => { 
-        alert("제출 완료되었습니다."); 
-        const prev = form.inspector.value; 
-        form.reset(); 
-        setDateTimeNow(); 
-        form.inspector.value = prev;
-        
-        // 기종전환시 잔량없음 항목 다시 비활성화
-        const chainRadios = document.querySelectorAll('input[name="chk_chain"]');
-        const qrStatus = document.getElementById('qrStatus');
-        chainRadios.forEach(radio => {
-          radio.disabled = true;
-          radio.classList.add('disabled-radio');
-          radio.required = false;
-        });
-        qrStatus.textContent = 'QR "2" 스캔';
-        qrStatus.className = 'qr-status qr-required';
-      })
-      .catch(err => alert("저장 실패: " + err));
+function stopQrScanner() {
+  document.getElementById("preview-wrapper").style.display = "none";
+  if (html5QrCodeInstance) {
+    html5QrCodeInstance.stop().then(() => html5QrCodeInstance.clear()).catch(console.error);
+  }
+}
+
+function checkQRCodeAndEnableChain(qrValue) {
+  const chainRadios = document.querySelectorAll('input[name="chk_chain"]');
+  const qrStatus = document.getElementById('qrStatus');
+  const item = document.getElementById('item_chain');
+
+  if (qrValue === "2") {
+    chainRadios.forEach(radio => {
+      radio.disabled = false;
+      radio.classList.remove('disabled-radio');
+      radio.required = true;
     });
-  </script>
+    item.classList.remove('disabled-item');
+    qrStatus.textContent = '✅ QR "2" 확인';
+    qrStatus.className = 'qr-status qr-success';
+  } else {
+    chainRadios.forEach(radio => {
+      radio.disabled = true;
+      radio.classList.add('disabled-radio');
+      radio.checked = false;
+      radio.required = false;
+    });
+    item.classList.add('disabled-item');
+    item.classList.remove('checked-ok', 'checked-ng');
+    item.querySelectorAll('.okng-btn').forEach(b => b.classList.remove('ok-selected', 'ng-selected'));
+    qrStatus.textContent = `❌ "${qrValue}" → "2" 필요`;
+    qrStatus.className = 'qr-status qr-required';
+    updateProgress();
+  }
+}
+
+// === 폼 제출 ===
+function validateForm() {
+  const qrResult = document.getElementById('qrResult').value;
+  if (qrResult !== "2") {
+    alert('기종전환시 잔량없음 항목을 위해 QR "2"를 스캔해주세요.');
+    return false;
+  }
+  const chainChecked = Array.from(document.querySelectorAll('input[name="chk_chain"]')).some(r => r.checked);
+  if (!chainChecked) {
+    alert('기종전환시 잔량없음 항목을 선택해주세요.');
+    return false;
+  }
+  return true;
+}
+
+document.getElementById('closePreview').addEventListener('click', stopQrScanner);
+
+document.getElementById("inspectionForm").addEventListener("submit", function(e) {
+  e.preventDefault();
+  if (!validateForm()) return;
+
+  const form = e.target;
+  const data = {
+    date: form.checkDate.value,
+    time: form.checkTime.value,
+    inspector: form.inspector.value,
+    machine: form.machine.value,
+    qrCode: form.qrResult.value,
+    inputs: {
+      "작업기종 표시": form.chk_input.value,
+      "기종전환시 잔량없음": form.chk_chain.value,
+      "높이검사 청소": form.chk_height.value,
+      "카메라 청소/풀림": form.chk_camera.value,
+      "이송밸트 걸림": form.chk_belt.value,
+      "회전판 걸림": form.chk_plate.value,
+      "에디작동": form.chk_eddy.value,
+      "배출부 인식": form.chk_out.value,
+      "불량샘플 검출": form.chk_sample.value
+    },
+    memo: form.memo.value
+  };
+
+  fetch("https://script.google.com/macros/s/AKfycbxkQJe51sc2Gc85t914Mkl3JWEQPOhn2hw6opTbM5t-aZVrzH0ZMW3mU4HHceT6YsqKDw/exec", {
+    method: "POST",
+    mode: "no-cors",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(data)
+  })
+  .then(() => {
+    alert("제출 완료되었습니다.");
+    const prev = form.inspector.value;
+    form.reset();
+    setDateTimeNow();
+    form.inspector.value = prev;
+
+    // 체크 아이템 시각 초기화
+    document.querySelectorAll('.check-item').forEach(el => {
+      el.classList.remove('checked-ok', 'checked-ng');
+      el.querySelectorAll('.okng-btn').forEach(b => b.classList.remove('ok-selected', 'ng-selected'));
+    });
+
+    // 기종전환 잔량 비활성화
+    const chainRadios = document.querySelectorAll('input[name="chk_chain"]');
+    chainRadios.forEach(radio => {
+      radio.disabled = true;
+      radio.classList.add('disabled-radio');
+      radio.required = false;
+    });
+    document.getElementById('item_chain').classList.add('disabled-item');
+    document.getElementById('qrStatus').textContent = 'QR "2" 스캔 필요';
+    document.getElementById('qrStatus').className = 'qr-status qr-required';
+    updateProgress();
+  })
+  .catch(err => alert("저장 실패: " + err));
+});
+
+window.addEventListener("DOMContentLoaded", () => {
+  setDateTimeNow();
+  updateProgress();
+});
+</script>
 </body>
 </html>
-
-
